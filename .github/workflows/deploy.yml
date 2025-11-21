@@ -34,22 +34,25 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-          # Create temp directory
-          mkdir build-folder
-          cp -r dist/* build-folder/
-
-          # Switch to deploy branch
-          git fetch origin deploy || true
-          git checkout deploy || git checkout --orphan deploy
-
-          # Remove old files
-          git rm -rf . || true
-
-          # Copy new build
-          cp -r build-folder/* .
-          rm -rf build-folder
-
+          # Create temp directory outside repo
+          cd ..
+          mkdir deploy-temp
+          cp -r onepacifichub-improved-main/dist/* deploy-temp/
+          
+          # Clone deploy branch fresh
+          git clone --single-branch --branch deploy https://github.com/Txshaa90/onepacifichub.com.git deploy-repo || git clone https://github.com/Txshaa90/onepacifichub.com.git deploy-repo
+          cd deploy-repo
+          
+          # Create deploy branch if it doesn't exist
+          git checkout deploy 2>/dev/null || git checkout --orphan deploy
+          
+          # Remove all files except .git
+          find . -maxdepth 1 ! -name '.git' ! -name '.' ! -name '..' -exec rm -rf {} +
+          
+          # Copy only built files
+          cp -r ../deploy-temp/* .
+          
           # Commit and push
-          git add .
-          git commit -m "Auto-build: $(date)"
+          git add -A
+          git commit -m "Auto-build: $(date)" || echo "No changes"
           git push -f origin deploy
