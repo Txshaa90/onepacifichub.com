@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ShoppingCart } from 'lucide-react'
+import { Menu, X, ShoppingCart, User } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import Logo from './Logo'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 
 const Navbar = () => {
   const { getCartCount } = useCart()
+  const { user, isAuthenticated } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -63,6 +65,36 @@ const Navbar = () => {
                 </motion.div>
               </Link>
             ))}
+            
+            {/* Account Button */}
+            {isAuthenticated ? (
+              <Link to="/account">
+                <motion.button
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
+                    scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <User size={18} />
+                  {user?.firstName || 'Account'}
+                </motion.button>
+              </Link>
+            ) : (
+              <Link to="/login">
+                <motion.button
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
+                    scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <User size={18} />
+                  Login
+                </motion.button>
+              </Link>
+            )}
+            
             <Link to="/cart">
               <motion.button
                 className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transition-shadow flex items-center gap-2 relative"
@@ -118,16 +150,46 @@ const Navbar = () => {
                   </motion.div>
                 </Link>
               ))}
-              <motion.button
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-3 rounded-full font-medium flex items-center justify-center gap-2"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ShoppingCart size={18} />
-                Shop Now
-              </motion.button>
+              
+              {/* Account Link - Mobile */}
+              {isAuthenticated ? (
+                <Link to="/account" onClick={() => setIsOpen(false)}>
+                  <motion.div
+                    className="flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium py-2"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <User size={18} />
+                    {user?.firstName || 'Account'}
+                  </motion.div>
+                </Link>
+              ) : (
+                <Link to="/login" onClick={() => setIsOpen(false)}>
+                  <motion.div
+                    className="flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium py-2"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <User size={18} />
+                    Login
+                  </motion.div>
+                </Link>
+              )}
+              
+              <Link to="/cart" onClick={() => setIsOpen(false)}>
+                <motion.button
+                  className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-3 rounded-full font-medium flex items-center justify-center gap-2"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ShoppingCart size={18} />
+                  Cart
+                </motion.button>
+              </Link>
             </div>
           </motion.div>
         )}
