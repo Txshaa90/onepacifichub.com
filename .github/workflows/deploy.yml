@@ -34,28 +34,22 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-          # Save current directory
-          REPO_DIR=$(pwd)
+          # Create temp folder with only dist contents
+          mkdir ../build-output
+          cp -r dist/* ../build-output/
           
-          # Create temp directory
-          cd /tmp
-          mkdir -p deploy-temp
-          cp -r $REPO_DIR/dist/* deploy-temp/
+          # Switch to deploy branch
+          git fetch origin deploy:deploy || true
+          git checkout deploy || git checkout --orphan deploy
           
-          # Clone deploy branch fresh
-          git clone --single-branch --branch deploy https://github.com/Txshaa90/onepacifichub.com.git deploy-repo 2>/dev/null || git clone https://github.com/Txshaa90/onepacifichub.com.git deploy-repo
-          cd deploy-repo
+          # Remove everything except .git
+          git rm -rf . 2>/dev/null || true
+          rm -rf * 2>/dev/null || true
           
-          # Create deploy branch if it doesn't exist
-          git checkout deploy 2>/dev/null || git checkout --orphan deploy
-          
-          # Remove all files except .git
-          find . -maxdepth 1 ! -name '.git' ! -name '.' ! -name '..' -exec rm -rf {} +
-          
-          # Copy only built files
-          cp -r /tmp/deploy-temp/* .
+          # Copy built files to root
+          cp -r ../build-output/* .
           
           # Commit and push
           git add -A
-          git commit -m "Auto-build: $(date)" || echo "No changes"
+          git commit -m "Deploy: $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
           git push -f origin deploy
