@@ -67,8 +67,8 @@ const Hero = () => {
               transition={{ duration: 0.3 }}
             >
               <img 
-                src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&h=800&fit=crop" 
-                alt="Sports car at event"
+                src="/images/west motors.jpg" 
+                alt="Toyota Supra at car event"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
