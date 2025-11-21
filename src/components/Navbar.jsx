@@ -48,19 +48,6 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/workspaces">
-              <motion.div
-                className={`font-medium transition-colors ${
-                  scrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-300'
-                }`}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                whileHover={{ y: -2 }}
-              >
-                Workspaces
-              </motion.div>
-            </Link>
             {navItems.map((item, index) => (
               <Link key={item.name} to={item.href}>
                 <motion.div
@@ -115,19 +102,6 @@ const Navbar = () => {
             className="md:hidden bg-white shadow-lg"
           >
             <div className="px-4 py-6 space-y-4">
-              <Link
-                to="/workspaces"
-                onClick={() => setIsOpen(false)}
-              >
-                <motion.div
-                  className="block text-gray-700 hover:text-blue-600 font-medium py-2"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  Workspaces
-                </motion.div>
-              </Link>
               {navItems.map((item, index) => (
                 <Link
                   key={item.name}

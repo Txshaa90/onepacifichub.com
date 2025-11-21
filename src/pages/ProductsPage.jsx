@@ -22,27 +22,27 @@ const ProductsPage = () => {
   const [selectedBrand, setSelectedBrand] = useState('')
   const [showFilters, setShowFilters] = useState(false)
 
-  // Define popular car brands with logos
-  const carBrands = [
-    { name: 'Cadillac', logo: '🚗', color: 'from-gray-700 to-gray-900' },
-    { name: 'Chevrolet', logo: '⚡', color: 'from-yellow-500 to-orange-500' },
-    { name: 'Chrysler', logo: '🔷', color: 'from-blue-600 to-blue-800' },
-    { name: 'Dodge', logo: '🐏', color: 'from-red-600 to-red-800' },
-    { name: 'Ford', logo: '🔵', color: 'from-blue-500 to-blue-700' },
-    { name: 'GMC', logo: '🔴', color: 'from-red-500 to-red-700' },
-    { name: 'Honda', logo: '🅷', color: 'from-gray-600 to-gray-800' },
-    { name: 'Jeep', logo: '🚙', color: 'from-green-600 to-green-800' },
-    { name: 'Mazda', logo: '🔘', color: 'from-gray-500 to-gray-700' },
-    { name: 'Nissan', logo: '⭕', color: 'from-gray-700 to-black' },
-    { name: 'Ram', logo: '🐏', color: 'from-gray-600 to-gray-900' },
-    { name: 'Toyota', logo: '🔴', color: 'from-red-500 to-red-600' }
+  // Define popular car makes
+  const carMakes = [
+    { name: 'Cadillac' },
+    { name: 'Chevrolet' },
+    { name: 'Chrysler' },
+    { name: 'Dodge' },
+    { name: 'Ford' },
+    { name: 'GMC' },
+    { name: 'Honda' },
+    { name: 'Jeep' },
+    { name: 'Mazda' },
+    { name: 'Nissan' },
+    { name: 'Ram' },
+    { name: 'Toyota' }
   ]
 
-  // Filter brands that have products
-  const availableBrands = useMemo(() => {
-    return carBrands.filter(brand => 
+  // Filter makes that have products
+  const availableMakes = useMemo(() => {
+    return carMakes.filter(make => 
       categoryProducts.some(product => 
-        product.name.includes(brand.name) || product.description.includes(brand.name)
+        product.name.includes(make.name) || product.description.includes(make.name)
       )
     )
   }, [categoryProducts])
@@ -168,48 +168,32 @@ const ProductsPage = () => {
           </p>
         </motion.div>
 
-        {/* Brand Filter Section */}
-        {availableBrands.length > 0 && (
+        {/* Make Filter Section */}
+        {availableMakes.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mb-8"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Shop by Brand</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {availableBrands.map((brand, index) => (
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Shop by Make</h2>
+            <div className="flex flex-wrap justify-center gap-3">
+              {availableMakes.map((make, index) => (
                 <motion.button
-                  key={brand.name}
+                  key={make.name}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
-                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedBrand(selectedBrand === brand.name ? '' : brand.name)}
-                  className={`relative p-6 rounded-2xl shadow-lg transition-all ${
-                    selectedBrand === brand.name
-                      ? `bg-gradient-to-br ${brand.color} text-white ring-4 ring-blue-400`
-                      : 'bg-white hover:shadow-xl'
+                  onClick={() => setSelectedBrand(selectedBrand === make.name ? '' : make.name)}
+                  className={`px-6 py-3 rounded-full font-semibold text-sm transition-all ${
+                    selectedBrand === make.name
+                      ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg'
                   }`}
                 >
-                  <div className="text-center">
-                    <div className="text-4xl mb-2">{brand.logo}</div>
-                    <p className={`font-bold text-sm ${
-                      selectedBrand === brand.name ? 'text-white' : 'text-gray-900'
-                    }`}>
-                      {brand.name}
-                    </p>
-                  </div>
-                  {selectedBrand === brand.name && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute -top-2 -right-2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
-                    >
-                      ✓
-                    </motion.div>
-                  )}
+                  {make.name}
                 </motion.button>
               ))}
             </div>
@@ -219,7 +203,7 @@ const ProductsPage = () => {
                   onClick={() => setSelectedBrand('')}
                   className="text-blue-600 hover:text-blue-700 font-semibold text-sm underline"
                 >
-                  Clear brand filter
+                  Clear make filter
                 </button>
               </div>
             )}
@@ -329,7 +313,7 @@ const ProductsPage = () => {
             <div className="flex items-center gap-2 flex-wrap">
               {selectedBrand && (
                 <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm font-medium">
-                  Brand: {selectedBrand}
+                  Make: {selectedBrand}
                 </span>
               )}
               {selectedYear && (

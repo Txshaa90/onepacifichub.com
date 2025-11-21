@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Star, ShoppingCart } from 'lucide-react'
+import { ShoppingCart } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 
 const ProductCard = ({ product, index }) => {
@@ -38,22 +38,6 @@ const ProductCard = ({ product, index }) => {
 
       {/* Product Info */}
       <div className="p-6">
-        {/* Rating */}
-        <div className="flex items-center gap-2 mb-2">
-          <div className="flex gap-0.5">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                size={16}
-                className={i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-              />
-            ))}
-          </div>
-          <span className="text-sm text-gray-600">
-            {product.rating} ({product.reviews})
-          </span>
-        </div>
-
         {/* Product Name */}
         <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
           {product.name}

@@ -11,8 +11,6 @@ const ProductDetailPage = () => {
   const { addToCart } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-
   // Find the category info
   const categoryInfo = categories.find(cat => cat.slug === category)
   
@@ -21,17 +19,6 @@ const ProductDetailPage = () => {
   
   // Find the specific product
   const product = categoryProducts.find(p => p.id === productId)
-
-  // Generate multiple images (in real scenario, these would come from product data)
-  const productImages = useMemo(() => {
-    if (!product) return []
-    return [
-      product.image,
-      product.image, // In real app, these would be different angles
-      product.image,
-      product.image
-    ]
-  }, [product])
 
   // Extract product specifications from name and description
   const specifications = useMemo(() => {
@@ -119,43 +106,19 @@ const ProductDetailPage = () => {
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Product Images */}
+          {/* Product Image */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="space-y-4"
           >
             {/* Main Image */}
             <div className="bg-white rounded-2xl p-8 shadow-xl">
               <img
-                src={productImages[selectedImageIndex]}
+                src={product.image}
                 alt={product.name}
                 className="w-full h-96 object-cover rounded-xl"
               />
-            </div>
-
-            {/* Image Thumbnails */}
-            <div className="grid grid-cols-4 gap-4">
-              {productImages.map((img, index) => (
-                <motion.button
-                  key={index}
-                  onClick={() => setSelectedImageIndex(index)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`bg-white rounded-xl p-2 shadow-md transition-all ${
-                    selectedImageIndex === index
-                      ? 'ring-4 ring-blue-500'
-                      : 'hover:shadow-lg'
-                  }`}
-                >
-                  <img
-                    src={img}
-                    alt={`${product.name} view ${index + 1}`}
-                    className="w-full h-20 object-cover rounded-lg"
-                  />
-                </motion.button>
-              ))}
             </div>
           </motion.div>
 
@@ -172,22 +135,6 @@ const ProductDetailPage = () => {
                 {product.name}
               </h1>
               <p className="text-sm text-gray-500">Part #: {product.id}</p>
-            </div>
-
-            {/* Rating */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={20}
-                    className={i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                  />
-                ))}
-              </div>
-              <span className="text-gray-600">
-                {product.rating} ({product.reviews} reviews)
-              </span>
             </div>
 
             {/* Price */}
