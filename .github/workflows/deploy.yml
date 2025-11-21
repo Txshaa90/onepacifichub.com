@@ -34,13 +34,16 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-          # Create temp directory outside repo
-          cd ..
-          mkdir deploy-temp
-          cp -r onepacifichub-improved-main/dist/* deploy-temp/
+          # Save current directory
+          REPO_DIR=$(pwd)
+          
+          # Create temp directory
+          cd /tmp
+          mkdir -p deploy-temp
+          cp -r $REPO_DIR/dist/* deploy-temp/
           
           # Clone deploy branch fresh
-          git clone --single-branch --branch deploy https://github.com/Txshaa90/onepacifichub.com.git deploy-repo || git clone https://github.com/Txshaa90/onepacifichub.com.git deploy-repo
+          git clone --single-branch --branch deploy https://github.com/Txshaa90/onepacifichub.com.git deploy-repo 2>/dev/null || git clone https://github.com/Txshaa90/onepacifichub.com.git deploy-repo
           cd deploy-repo
           
           # Create deploy branch if it doesn't exist
@@ -50,7 +53,7 @@ jobs:
           find . -maxdepth 1 ! -name '.git' ! -name '.' ! -name '..' -exec rm -rf {} +
           
           # Copy only built files
-          cp -r ../deploy-temp/* .
+          cp -r /tmp/deploy-temp/* .
           
           # Commit and push
           git add -A
