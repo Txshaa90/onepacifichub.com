@@ -53,9 +53,7 @@ const Navbar = () => {
             {navItems.map((item, index) => (
               <Link key={item.name} to={item.href}>
                 <motion.div
-                  className={`font-medium transition-colors ${
-                    scrolled ? 'text-gray-700 hover:text-blue-600' : 'text-white hover:text-blue-300'
-                  }`}
+                  className="font-bold text-gray-900 hover:text-blue-600 transition-colors"
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 + 0.3 }}
@@ -70,9 +68,7 @@ const Navbar = () => {
             {isAuthenticated ? (
               <Link to="/account">
                 <motion.button
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
-                    scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
-                  }`}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full font-bold text-gray-900 hover:bg-gray-100 transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -83,9 +79,7 @@ const Navbar = () => {
             ) : (
               <Link to="/login">
                 <motion.button
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
-                    scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
-                  }`}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full font-bold text-gray-900 hover:bg-gray-100 transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >

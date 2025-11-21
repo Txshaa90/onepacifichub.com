@@ -29,7 +29,7 @@ const About = () => {
   ]
 
   return (
-    <section id="about-section" ref={ref} className="py-24 bg-white">
+    <section id="about-section" ref={ref} className="py-24 bg-gradient-to-br from-blue-500 to-blue-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -38,7 +38,7 @@ const About = () => {
           className="text-center max-w-3xl mx-auto mb-16"
         >
           <motion.h2 
-            className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent"
+            className="text-4xl md:text-5xl font-bold mb-6 text-white"
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -47,7 +47,7 @@ const About = () => {
           </motion.h2>
           
           <motion.p 
-            className="text-xl text-gray-600 leading-relaxed"
+            className="text-xl text-white/90 leading-relaxed"
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -84,7 +84,7 @@ const About = () => {
                 </div>
                 
                 {/* Description */}
-                <p className="text-gray-600 leading-relaxed group-hover:text-blue-600 transition-colors">
+                <p className="text-white/90 leading-relaxed group-hover:text-white transition-colors">
                   {feature.description}
                 </p>
               </motion.div>
