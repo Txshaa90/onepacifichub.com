@@ -67,7 +67,7 @@ const Hero = () => {
               transition={{ duration: 0.3 }}
             >
               <img 
-                src="/images/west motors.jpg" 
+                src="/images/west motors.jpeg" 
                 alt="Toyota Supra at car event"
                 className="w-full h-full object-cover"
               />
