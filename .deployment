@@ -1,0 +1,2 @@
+[config]
+command = git fetch origin deploy && git reset --hard origin/deploy
