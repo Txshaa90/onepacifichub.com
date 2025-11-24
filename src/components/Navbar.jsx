@@ -44,12 +44,12 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/">
+          <Link to="/" className="flex-shrink-0">
             <Logo size="small" />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-8 ml-12">
             {navItems.map((item, index) => (
               <Link key={item.name} to={item.href}>
                 <motion.div
