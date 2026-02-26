@@ -178,6 +178,25 @@ const ProductsPage = () => {
           ]}
         />
 
+        {/* Informational Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-6 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-4 md:p-6"
+        >
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-white text-center md:text-left">
+              <h3 className="text-lg md:text-xl font-bold mb-1">
+                ✓ Authentic OEM Parts • ✓ Fast Shipping • ✓ Quality Guaranteed
+              </h3>
+              <p className="text-sm md:text-base text-blue-100">
+                All products are genuine parts with warranty coverage
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Category Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
