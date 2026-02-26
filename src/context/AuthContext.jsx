@@ -22,22 +22,17 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Try Supabase session first if configured
-        if (isSupabaseConfigured()) {
-          const session = await supabaseAuthService.getSupabaseSession()
-          if (session) {
-            localStorage.setItem('authToken', session.token)
-            setUser(session.user)
-            setLoading(false)
-            return
-          }
+        if (!isSupabaseConfigured()) {
+          console.warn('Supabase not configured. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env')
+          setLoading(false)
+          return
         }
-        
-        // Fallback to local auth
-        const token = localStorage.getItem('authToken')
-        if (token) {
-          const { user } = await authService.verifyToken(token)
-          setUser(user)
+
+        // Get Supabase session
+        const session = await supabaseAuthService.getSupabaseSession()
+        if (session) {
+          localStorage.setItem('authToken', session.token)
+          setUser(session.user)
         }
       } catch (err) {
         console.error('Auth initialization error:', err)
@@ -50,33 +45,17 @@ export const AuthProvider = ({ children }) => {
     initAuth()
   }, [])
 
-  // Login function - Uses Supabase if configured, otherwise local auth
+  // Login function - Uses Supabase authentication
   const login = async (email, password, rememberMe = false) => {
     try {
       setLoading(true)
       setError(null)
       
-      let token, user
-      
-      // Try Supabase login if configured
-      if (isSupabaseConfigured()) {
-        try {
-          const result = await supabaseAuthService.loginWithSupabase(email, password)
-          token = result.token
-          user = result.user
-        } catch (supabaseErr) {
-          // If Supabase fails, fall back to local auth
-          console.warn('Supabase login failed, falling back to local auth:', supabaseErr.message)
-          const result = await authService.login(email, password, rememberMe)
-          token = result.token
-          user = result.user
-        }
-      } else {
-        // Use local auth if Supabase not configured
-        const result = await authService.login(email, password, rememberMe)
-        token = result.token
-        user = result.user
+      if (!isSupabaseConfigured()) {
+        throw new Error('Authentication not configured. Please contact support.')
       }
+      
+      const { token, user } = await supabaseAuthService.loginWithSupabase(email, password)
       
       localStorage.setItem('authToken', token)
       setUser(user)
@@ -91,13 +70,17 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // Register function
+  // Register function - Uses Supabase authentication
   const register = async (userData) => {
     try {
       setLoading(true)
       setError(null)
       
-      const { token, user } = await authService.register(userData)
+      if (!isSupabaseConfigured()) {
+        throw new Error('Authentication not configured. Please contact support.')
+      }
+      
+      const { token, user } = await supabaseAuthService.registerWithSupabase(userData)
       
       localStorage.setItem('authToken', token)
       setUser(user)
@@ -115,17 +98,19 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = async () => {
     try {
-      // Logout from Supabase if configured
       if (isSupabaseConfigured()) {
         await supabaseAuthService.logoutWithSupabase()
       }
       
-      // Also clear local auth
-      await authService.logout()
+      localStorage.removeItem('authToken')
       setUser(null)
       setError(null)
     } catch (err) {
       console.error('Logout error:', err)
+      // Still clear local state even if Supabase logout fails
+      localStorage.removeItem('authToken')
+      setUser(null)
+      setError(null)
     }
   }
 
@@ -166,13 +151,17 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // Request password reset
+  // Request password reset - Uses Supabase
   const requestPasswordReset = async (email) => {
     try {
       setLoading(true)
       setError(null)
       
-      const result = await authService.requestPasswordReset(email)
+      if (!isSupabaseConfigured()) {
+        throw new Error('Authentication not configured. Please contact support.')
+      }
+      
+      const result = await supabaseAuthService.requestPasswordResetSupabase(email)
       
       return { success: true, message: result.message }
     } catch (err) {

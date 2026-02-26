@@ -1,5 +1,18 @@
 # Supabase Authentication Setup Guide
 
+## ⚠️ Important: Production-Ready Setup
+
+This authentication system now uses **Supabase for BOTH login and registration** (unified approach).
+
+**What changed from hybrid approach:**
+- ✅ Login → Supabase
+- ✅ Register → Supabase  
+- ❌ No local auth fallback (production-ready)
+
+This ensures all users are in one system and prevents the "two separate user databases" problem.
+
+---
+
 ## 🚀 Quick Setup (5 minutes)
 
 ### Step 1: Create Supabase Project
@@ -10,7 +23,7 @@
 4. Click "New Project"
 5. Fill in:
    - **Name**: onepacifichub
-   - **Database Password**: (generate a strong password)
+   - **Database Password**: (generate a strong password - save it!)
    - **Region**: Choose closest to your users
 6. Click "Create new project" (takes ~2 minutes)
 
@@ -21,6 +34,8 @@
 3. Copy these two values:
    - **Project URL** (looks like: `https://xxxxx.supabase.co`)
    - **anon public** key (under "Project API keys")
+
+⚠️ **Security Note**: The `anon` key is safe for frontend. Never use `service_role` key in client code.
 
 ### Step 3: Configure Your App
 
@@ -44,9 +59,11 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 
 1. In Supabase dashboard, go to **Authentication** → **Providers**
 2. Enable **Email** provider (should be enabled by default)
-3. Configure email templates (optional):
-   - Go to **Authentication** → **Email Templates**
-   - Customize confirmation and password reset emails
+3. **For Testing**: Disable email confirmation
+   - Go to **Authentication** → **Settings**
+   - Uncheck "Enable email confirmations"
+   - Click **Save**
+4. **For Production**: Re-enable email confirmations
 
 ### Step 5: Test Your Setup
 
@@ -57,18 +74,42 @@ npm run dev
 ```
 
 2. Go to `/register` and create a test account
-3. Check your email for confirmation (if email confirmation is enabled)
-4. Try logging in at `/login`
+3. Try logging in at `/login`
+4. Verify session persists on page reload
+
+---
+
+## 🚨 CRITICAL: Vercel Deployment Setup
+
+**⚠️ Authentication will NOT work on Vercel without this step!**
+
+### Add Environment Variables to Vercel
+
+1. Go to [vercel.com/dashboard](https://vercel.com/dashboard)
+2. Select your project
+3. Go to **Settings** → **Environment Variables**
+4. Add both variables:
+
+```
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+```
+
+5. Set for: **Production**, **Preview**, and **Development**
+6. Click **Save**
+7. **Redeploy** your application
+
+**Important**: Environment variables in `.env` are only for local development. Vercel needs them configured separately.
 
 ---
 
 ## ✅ What's Working Now
 
-- ✅ **Login with Supabase** - Users authenticate through Supabase
+- ✅ **Unified Authentication** - Both login and register use Supabase
 - ✅ **Session Management** - Automatic token refresh
 - ✅ **Persistent Sessions** - Users stay logged in
 - ✅ **Logout** - Properly clears Supabase session
-- ✅ **Fallback to Local Auth** - Works without Supabase configured
+- ✅ **Password Security** - Passwords hashed by Supabase (never stored locally)
 - ✅ **Error Handling** - Clear error messages
 
 ---
@@ -78,11 +119,20 @@ npm run dev
 ### Login Flow
 
 1. User enters email/password
-2. System checks if Supabase is configured
-3. If configured → Uses Supabase authentication
-4. If not configured → Falls back to local auth
-5. Stores session token in localStorage
-6. User is redirected to intended page
+2. System authenticates with Supabase
+3. Supabase validates credentials and returns JWT token
+4. Token stored in localStorage
+5. User is redirected to intended page
+6. Session automatically restored on page reload
+
+### Registration Flow
+
+1. User provides firstName, lastName, email, password
+2. System creates account in Supabase
+3. Password automatically hashed by Supabase (bcrypt)
+4. User metadata (firstName, lastName) stored
+5. JWT token returned and stored
+6. User logged in automatically
 
 ### Session Persistence
 
@@ -90,6 +140,15 @@ npm run dev
 - Tokens are stored in localStorage
 - Auto-refresh before expiration
 - Session restored on page reload
+- Logout clears both Supabase session and localStorage
+
+### Security Features
+
+- ✅ Passwords never stored locally
+- ✅ Passwords hashed with bcrypt by Supabase
+- ✅ JWT tokens with expiration
+- ✅ Automatic token refresh
+- ✅ Rate limiting on auth endpoints
 
 ---
 
