@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import * as authService from '../services/authService'
+import * as supabaseAuthService from '../services/supabaseAuthService'
+import { isSupabaseConfigured } from '../lib/supabase'
 
 const AuthContext = createContext()
 
@@ -20,6 +22,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // Try Supabase session first if configured
+        if (isSupabaseConfigured()) {
+          const session = await supabaseAuthService.getSupabaseSession()
+          if (session) {
+            localStorage.setItem('authToken', session.token)
+            setUser(session.user)
+            setLoading(false)
+            return
+          }
+        }
+        
+        // Fallback to local auth
         const token = localStorage.getItem('authToken')
         if (token) {
           const { user } = await authService.verifyToken(token)
@@ -36,13 +50,33 @@ export const AuthProvider = ({ children }) => {
     initAuth()
   }, [])
 
-  // Login function
+  // Login function - Uses Supabase if configured, otherwise local auth
   const login = async (email, password, rememberMe = false) => {
     try {
       setLoading(true)
       setError(null)
       
-      const { token, user } = await authService.login(email, password, rememberMe)
+      let token, user
+      
+      // Try Supabase login if configured
+      if (isSupabaseConfigured()) {
+        try {
+          const result = await supabaseAuthService.loginWithSupabase(email, password)
+          token = result.token
+          user = result.user
+        } catch (supabaseErr) {
+          // If Supabase fails, fall back to local auth
+          console.warn('Supabase login failed, falling back to local auth:', supabaseErr.message)
+          const result = await authService.login(email, password, rememberMe)
+          token = result.token
+          user = result.user
+        }
+      } else {
+        // Use local auth if Supabase not configured
+        const result = await authService.login(email, password, rememberMe)
+        token = result.token
+        user = result.user
+      }
       
       localStorage.setItem('authToken', token)
       setUser(user)
@@ -81,6 +115,12 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = async () => {
     try {
+      // Logout from Supabase if configured
+      if (isSupabaseConfigured()) {
+        await supabaseAuthService.logoutWithSupabase()
+      }
+      
+      // Also clear local auth
       await authService.logout()
       setUser(null)
       setError(null)
