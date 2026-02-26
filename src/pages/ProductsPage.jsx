@@ -67,7 +67,9 @@ const ProductsPage = () => {
   const years = useMemo(() => {
     const yearSet = new Set()
     categoryProducts.forEach(product => {
-      const yearMatches = product.name.match(/\b(19|20)\d{2}\b/g)
+      // Check both name and description for years
+      const text = `${product.name} ${product.description}`
+      const yearMatches = text.match(/\b(19|20)\d{2}\b/g)
       if (yearMatches) {
         yearMatches.forEach(year => yearSet.add(year))
       }
