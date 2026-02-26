@@ -1,0 +1,59 @@
+name: Build and Deploy to Deploy Branch
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          echo "DEBUG: Listing build output directory..."
+          ls -la dist || echo "dist folder NOT FOUND"
+
+      - name: Deploy to deploy branch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          # Create temp folder and copy build output
+          mkdir -p ../build-output
+          cp -r ./dist/* ../build-output/
+
+          # Switch to deploy branch
+          git fetch origin deploy || true
+          git checkout deploy || git checkout --orphan deploy
+
+          # Clean existing files
+          git rm -rf . 2>/dev/null || true
+          rm -rf * 2>/dev/null || true
+
+          # Copy new build output to branch root
+          cp -r ../build-output/* .
+
+          # Commit + push
+          git add -A
+          git commit -m "Deploy: $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes"
+          git push -f origin deploy
