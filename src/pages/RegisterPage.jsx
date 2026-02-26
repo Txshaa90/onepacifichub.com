@@ -14,31 +14,142 @@ const RegisterPage = () => {
     password: '',
     confirmPassword: ''
   })
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState({})
   const [loading, setLoading] = useState(false)
+  const [passwordStrength, setPasswordStrength] = useState(0)
 
   const handleChange = (e) => {
+    const { name, value } = e.target
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     })
-    setError('')
+    
+    // Clear error for this field
+    setErrors(prev => ({ ...prev, [name]: '' }))
+    
+    // Validate on change
+    validateField(name, value)
+    
+    // Calculate password strength
+    if (name === 'password') {
+      calculatePasswordStrength(value)
+    }
+  }
+
+  const handleBlur = (e) => {
+    const { name } = e.target
+    setTouched(prev => ({ ...prev, [name]: true }))
+    validateField(name, formData[name])
+  }
+
+  const validateField = (name, value) => {
+    let error = ''
+
+    switch (name) {
+      case 'firstName':
+        if (!value.trim()) {
+          error = 'First name is required'
+        } else if (value.trim().length < 2) {
+          error = 'First name must be at least 2 characters'
+        } else if (!/^[a-zA-Z\s'-]+$/.test(value)) {
+          error = 'First name can only contain letters'
+        }
+        break
+
+      case 'lastName':
+        if (!value.trim()) {
+          error = 'Last name is required'
+        } else if (value.trim().length < 2) {
+          error = 'Last name must be at least 2 characters'
+        } else if (!/^[a-zA-Z\s'-]+$/.test(value)) {
+          error = 'Last name can only contain letters'
+        }
+        break
+
+      case 'email':
+        if (!value.trim()) {
+          error = 'Email is required'
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = 'Please enter a valid email address'
+        }
+        break
+
+      case 'password':
+        if (!value) {
+          error = 'Password is required'
+        } else if (value.length < 8) {
+          error = 'Password must be at least 8 characters'
+        } else if (!/(?=.*[a-z])/.test(value)) {
+          error = 'Password must contain at least one lowercase letter'
+        } else if (!/(?=.*[A-Z])/.test(value)) {
+          error = 'Password must contain at least one uppercase letter'
+        } else if (!/(?=.*\d)/.test(value)) {
+          error = 'Password must contain at least one number'
+        }
+        break
+
+      case 'confirmPassword':
+        if (!value) {
+          error = 'Please confirm your password'
+        } else if (value !== formData.password) {
+          error = 'Passwords do not match'
+        }
+        break
+
+      default:
+        break
+    }
+
+    setErrors(prev => ({ ...prev, [name]: error }))
+    return error
+  }
+
+  const calculatePasswordStrength = (password) => {
+    let strength = 0
+    if (password.length >= 8) strength++
+    if (password.length >= 12) strength++
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++
+    if (/\d/.test(password)) strength++
+    if (/[^a-zA-Z\d]/.test(password)) strength++
+    setPasswordStrength(strength)
+  }
+
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength <= 1) return 'bg-red-500'
+    if (passwordStrength <= 3) return 'bg-yellow-500'
+    return 'bg-green-500'
+  }
+
+  const getPasswordStrengthText = () => {
+    if (passwordStrength <= 1) return 'Weak'
+    if (passwordStrength <= 3) return 'Medium'
+    return 'Strong'
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
-      setLoading(false)
-      return
-    }
+    // Mark all fields as touched
+    setTouched({
+      firstName: true,
+      lastName: true,
+      email: true,
+      password: true,
+      confirmPassword: true
+    })
 
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters')
+    // Validate all fields
+    const firstNameError = validateField('firstName', formData.firstName)
+    const lastNameError = validateField('lastName', formData.lastName)
+    const emailError = validateField('email', formData.email)
+    const passwordError = validateField('password', formData.password)
+    const confirmPasswordError = validateField('confirmPassword', formData.confirmPassword)
+
+    // Check if there are any errors
+    if (firstNameError || lastNameError || emailError || passwordError || confirmPasswordError) {
       setLoading(false)
       return
     }
@@ -48,7 +159,7 @@ const RegisterPage = () => {
     if (result.success) {
       navigate('/')
     } else {
-      setError(result.error)
+      setErrors(prev => ({ ...prev, submit: result.error }))
     }
     
     setLoading(false)
@@ -77,15 +188,15 @@ const RegisterPage = () => {
             <p className="text-gray-600">Join OnePacificHub today</p>
           </div>
 
-          {/* Error Message */}
-          {error && (
+          {/* Submit Error Message */}
+          {errors.submit && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700"
             >
               <AlertCircle size={20} />
-              <span>{error}</span>
+              <span>{errors.submit}</span>
             </motion.div>
           )}
 
@@ -105,11 +216,17 @@ const RegisterPage = () => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      touched.firstName && errors.firstName ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder="John"
                   />
                 </div>
+                {touched.firstName && errors.firstName && (
+                  <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                )}
               </div>
 
               <div>
@@ -122,10 +239,16 @@ const RegisterPage = () => {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                    touched.lastName && errors.lastName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Doe"
                 />
+                {touched.lastName && errors.lastName && (
+                  <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                )}
               </div>
             </div>
 
@@ -142,11 +265,17 @@ const RegisterPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                    touched.email && errors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="you@example.com"
                 />
               </div>
+              {touched.email && errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
 
             {/* Password Fields */}
@@ -163,11 +292,36 @@ const RegisterPage = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      touched.password && errors.password ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder="••••••••"
                   />
                 </div>
+                {touched.password && errors.password && (
+                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                )}
+                {formData.password && (
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-gray-600">Password strength:</span>
+                      <span className={`text-xs font-medium ${
+                        passwordStrength <= 1 ? 'text-red-600' : 
+                        passwordStrength <= 3 ? 'text-yellow-600' : 'text-green-600'
+                      }`}>
+                        {getPasswordStrengthText()}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                      <div
+                        className={`h-1.5 rounded-full transition-all ${getPasswordStrengthColor()}`}
+                        style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -182,11 +336,17 @@ const RegisterPage = () => {
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      touched.confirmPassword && errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder="••••••••"
                   />
                 </div>
+                {touched.confirmPassword && errors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                )}
               </div>
             </div>
 
